@@ -1,0 +1,9 @@
+Rule Structure
+==============
+ 
+----+~~~~~~~~~~~~~
+0000:bad\s+stuff.*
+
+- Rule ID  : 4 digit identificator
++ Separator: 1 character separator
+~ Rule Re  : N characters of rule regular expression

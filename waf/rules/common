@@ -1,0 +1,22 @@
+# rules common to all other targets
+0000:<(?:iframe|img|input|object|script).+
+0001:(?:onmouseover|onerror|onload)\=.+
+
+0002:current_(?:user|database|schema|connection_id)(?:\s+|\s*/\*.*\*/\s*)\(.+
+0003:from(?:\s+|\s*/\*.*\*/\s*)information_schema.+
+0004:group(?:\s+|\s*/\*.*\*/\s*)by(?:\s+|\s*/\*.*\*/\s*).+
+0005:into(?:\s+|\s*/\*.*\*/\s*)(dump|out)file(?:\s+|\s*/\*.*\*/\s*).+
+0006:select(?:\s+|\s*/\*.*\*/\s*)[\w,\s/\*\(\)]+(?:\s+|\s*/\*.*\*/\s*)from(?:\s+|\s*/\*.*\*/\s*).+
+0007:union(?:\s+|\s*/\*.*\*/\s*)(?:(all|distinct)(?:\s+|\s*/\*.*\*/\s*))?select(?:\s+|\s*/\*.*\*/\s*).+
+0008:sleep\((?:\s+|\s*/\*.*\*/\s*)\d+(?:\s+|\s*/\*.*\*/\s*)\)
+0009:select(?:\s+|\s*/\*.*\*/\s*)(?:system_user|user|database)(?:\s*|\s*/\*.*\*/\s*)\((?:\s*|\s*/\*.*\*/\s*)\)
+0010:select(?:\s+|\s*/\*.*\*/\s*)@@(?:version|hostname|datadir)
+0011:create(?:\s+|\s*/\*.*\*/\s*)user(?:\s+|\s*/\*.*\*/\s*)[\w`]+(?:\s+|\s*/\*.*\*/\s*)identified(?:\s+|\s*/\*.*\*/\s*)by(?:\s+|\s*/\*.*\*/\s*).+
+
+0012:base64_(?:en|de)code\s*\(
+0013:\$_(?:GET|POST|cookie|files|session|env|phplib|GLOBALS|REQUEST|SERVER)
+0014:(?:define|eval|file_get_contents|include|require|require_once|shell_exec|phpinfo|system|passthru|preg_\w+|execute|echo|print|print_r|var_dump|(fp)open|alert|showmodaldialog)\s*\(
+0015:/proc/(?:\W*(self|[0-9]+))+/(environ|fd)
+
+0016:etc/\W*passwd
+0017:php://.+
