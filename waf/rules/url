@@ -2,4 +2,4 @@
 4000:\.\./
 4001:\.(bash_history|git|gitignore|htaccess|htpasswd|svn)
 4002:(backup|vhost|host|wwwroot|www|site|root|public_html).*\.(rar|tar|tar\.gz|tar\.bz2|tgz|zip)
-4002:\.php(?:\.|_|-)[\d\.\-_]*(?:backup|bak|bkp|back|old|new|ori|copy)
+4003:\.php(?:\.|_|-)[\d\.\-_]*(?:backup|bak|bkp|back|old|new|ori|copy)
