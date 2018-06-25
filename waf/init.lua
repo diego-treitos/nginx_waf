@@ -90,7 +90,7 @@ function load_rules( rule_type, rule_flag )
           rule_re = rule:sub( 6 )
           rules[ rule_id ] = rule_re
           if nw_rule_ids[ rule_id ] == nil then
-            table.insert(nw_rule_ids, rule_id)
+            nw_rule_ids[ rule_id ] = true
           else
             error("Rule ID "..rule_id.." is duplicated")
           end
