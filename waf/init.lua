@@ -71,9 +71,14 @@ function block( rule_type, rule_id, text_to_check )
       end
     end
   end
-  -- block the request
+  -- log the request
   log_blocked( rule_type, rule_id, text_to_check )
-  return ngx.exec( nw_location_denied )
+  -- clean the request to avoid rechecking it
+  ngx.req.set_body_data( '' )
+  ngx.req.clear_header( 'User-Agent' )
+  ngx.req.clear_header( 'Cookie' )
+  -- block the request (also changes the url and clears the args)
+  return ngx.exec( nw_location_denied, '' )
 end
 
 ---- load rules ----
