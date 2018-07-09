@@ -217,6 +217,9 @@ nw_rules.agent = {
     if nw_check_agent then
       -- define TARGET to match against rules
       local TARGET = ngx.var.http_user_agent
+      if TARGET == nil then
+        return true
+      end
       
       -- check common rules
       nw_common_rules.check( TARGET )
