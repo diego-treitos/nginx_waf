@@ -3,7 +3,7 @@
 
 require 'config'
 
-if nw_enabled then
+if nw_enabled and not ngx.req.is_internal() then
   -- check whitelist
   local whitelisted = false
   for _,host in pairs( nw_remote_whitelist ) do
