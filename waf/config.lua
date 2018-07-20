@@ -2,7 +2,7 @@
 
 -- general --
 nw_enabled = true
-nw_location_denied = '/waf-blocked'
+nw_location_denied = '@waf-blocked'
 
 -- rule type toggle --
 nw_check_url     = true
