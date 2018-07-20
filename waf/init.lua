@@ -75,11 +75,13 @@ function block( rule_type, rule_id, text_to_check )
   log_blocked( rule_type, rule_id, text_to_check )
   -- clean the request to avoid rechecking it
   ngx.req.set_method( ngx.HTTP_GET )
-  if ngx.header.content_length ~= nil then
-    ngx.req.set_body_data( '' )
+  ngx.req.set_uri( '/', false ) -- use uri tat is not blocked
+  if ngx.header.content_length ~= nil then -- use body that is not blocked
+    ngx.req.set_body_data( '' ) 
     ngx.req.clear_header( 'Content-Length' )
   end
   ngx.req.clear_header( 'User-Agent' )
+  ngx.req.set_header( 'User-Agent', 'nginx_waf_blocked' ) -- use agent that is not blocked ( non-empty )
   ngx.req.clear_header( 'Cookie' )
   -- block the request (also changes the url and clears the args)
   return ngx.exec( nw_location_denied, '' )
