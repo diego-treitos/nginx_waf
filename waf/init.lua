@@ -32,7 +32,7 @@ function log_blocked( rule_type, rule_id, offending_text )
     local ip_addr = ngx.var.remote_addr
     local time    = ngx.localtime()
     local domain  = ngx.var.server_name
-    local line = time..' '..domain..' '..ip_addr..' ['..rule_type..':'..rule_id..'] "'..offending_text..'"\n'
+    local line = string.format( '%s %s %15s [%7s:%4s] "%s"\n', time, domain, ip_addr, rule_type, rule_id, offending_text )
 
     -- write to file
     local log_file = io.open( nw_log_file, 'a' )
