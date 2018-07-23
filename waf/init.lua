@@ -213,7 +213,7 @@ nw_rules.agent = {
       -- define TARGET to match against rules
       local TARGET = ngx.var.http_user_agent
       if TARGET == nil then
-        block( '  agent', ' nil', '""' )
+        block( '  agent', ' nil', '' )
       end
       
       -- check common rules
