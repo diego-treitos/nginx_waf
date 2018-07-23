@@ -29,8 +29,8 @@ wtest() {
 set -f
 
 echo "POST tests"
-wtest "/" "-d \"t=select * from user\""
-wtest "/" "-d \"t=current_user (a\""
+wtest "/" "-dt=select * from user"
+wtest "/" "-dt=current_user (a"
 
 echo "URL tests"
 wtest "/t.php?t=select/*this is mysql space*/* from user" ""
