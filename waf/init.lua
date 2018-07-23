@@ -221,7 +221,7 @@ nw_rules.agent = {
 
       -- check specific rules
       for rule_id, rule_re in pairs( nw_rules.agent.rules ) do
-        if ngx.re.match( TARGET, rule_re, 'ijo' ) then
+        if ngx.re.match( TARGET, rule_re, 'jo' ) then
           block( '  agent', rule_id, TARGET )
         end
       end
