@@ -2,6 +2,7 @@
 --
 
 require 'config'
+local etlua = require 'etlua'
 
 
 ---- helpers ----
@@ -77,8 +78,27 @@ function block( rule_type, rule_id, text_to_check )
   return ngx.exec( nw_location_denied, '' )
 end
 
+
+---- core check ----
+--
+-- checks the rules of a certain type
+function nw_check( rule_type, target, re_flags )
+  -- iterate over rule templates for given rule type
+  for rule_id, rule_re_t in pairs( nw_rules[rule_type].rules ) do
+    -- render this rule
+    local rule_re = etlua.render( rule_re_t, ngx.var )
+    ngx.log(ngx.STDERR, rule_re)
+    -- check if we need to block this rule
+    if ngx.re.match( target, rule_re, re_flags ) then
+      block( rule_type, rule_id, target)
+    end
+  end
+end
+
+
 ---- load rules ----
 --
+-- loads the rules from the rules files
 nw_rule_ids = {}
 function load_rules( rule_type, rule_flag )
   local rules = {}
@@ -104,28 +124,21 @@ function load_rules( rule_type, rule_flag )
 end
 
 
----- common rules  ----
---
-nw_common_rules = {
-  -- always load common rules
-  rules = load_rules( 'common', true ),
-  check = function( text_to_check )
-    if text_to_check ~= nil and text_to_check ~= '' then
-      for rule_id, rule_re in pairs( nw_common_rules.rules ) do
-        if ngx.re.match( text_to_check, rule_re, 'ijo' ) then
-          block( ' common', rule_id, text_to_check )
-        end
-      end
-    end
-    return true
-  end
-}
-
-
 ---- rules table ----
 --
 nw_rules = {}
 
+-- common rules --
+nw_rules.common = {
+  -- always load common rules
+  rules = load_rules( 'common', true ),
+  check = function( TARGET )
+    if TARGET ~= nil and TARGET ~= '' then
+      nw_check('common', TARGET, 'ijo')
+    end
+    return true
+  end
+}
 
 -- url rules --
 nw_rules.url = {
@@ -136,19 +149,14 @@ nw_rules.url = {
       local TARGET = ngx.var.uri
       
       -- check common rules
-      nw_common_rules.check( TARGET )
+      nw_rules.common.check( TARGET )
 
       -- check specific rules
-      for rule_id, rule_re in pairs( nw_rules.url.rules ) do
-        if ngx.re.match( TARGET, rule_re, 'ijo' ) then
-          block( '    url', rule_id, TARGET )
-        end
-      end
+      nw_check('url', TARGET, 'ijo')
     end
     return true
   end
 }
-
 
 -- args rules --
 nw_rules.args = {
@@ -159,7 +167,7 @@ nw_rules.args = {
       local args_tab, err = ngx.req.get_uri_args()
       if err == "truncated" then
         -- More than 100 args were passed
-        block( '   args', 'none', 'more than 100 args supplied')
+        block( 'args', 'none', 'more than 100 args supplied')
       end
         
       -- define TARGET to match against rules
@@ -167,20 +175,15 @@ nw_rules.args = {
       
       if TARGET ~= '' then
         -- check common rules
-        nw_common_rules.check( TARGET )
+        nw_rules.common.check( TARGET )
 
         -- check specific rules
-        for rule_id, rule_re in pairs( nw_rules.args.rules ) do
-          if ngx.re.match( TARGET, rule_re, 'ijo' ) then
-            block( '   args', rule_id, TARGET )
-          end
-        end
+        nw_check('args', TARGET, 'ijo')
       end
     end
     return true
   end
 }
-
 
 -- cookies rules --
 nw_rules.cookies = {
@@ -189,21 +192,16 @@ nw_rules.cookies = {
     if nw_check_cookies then
       -- define TARGET to match against rules
       local TARGET = ngx.var.http_cookie
-      
+
       -- check common rules
-      nw_common_rules.check( TARGET )
+      nw_rules.common.check( TARGET )
 
       -- check specific rules
-      for rule_id, rule_re in pairs( nw_rules.cookies.rules ) do
-        if ngx.re.match( TARGET, rule_re, 'ijo' ) then
-          block( 'cookies', rule_id, TARGET )
-        end
-      end
+      nw_check('cookies', TARGET, 'ijo')
     end
     return true
   end
 }
-
 
 -- agent rules --
 nw_rules.agent = {
@@ -213,23 +211,18 @@ nw_rules.agent = {
       -- define TARGET to match against rules
       local TARGET = ngx.var.http_user_agent
       if TARGET == nil then
-        block( '  agent', ' nil', '' )
+        block( 'agent', ' nil', '' )
       end
-      
+
       -- check common rules
-      nw_common_rules.check( TARGET )
+      nw_rules.common.check( TARGET )
 
       -- check specific rules
-      for rule_id, rule_re in pairs( nw_rules.agent.rules ) do
-        if ngx.re.match( TARGET, rule_re, 'jo' ) then
-          block( '  agent', rule_id, TARGET )
-        end
-      end
+      nw_check('agent', TARGET, 'jo')
     end
     return true
   end
 }
-
 
 -- post rules --
 nw_rules.post = {
@@ -243,7 +236,7 @@ nw_rules.post = {
       local args_tab, err = ngx.req.get_post_args()
       if err == "truncated" then
         -- More than 100 args were passed
-        block( '   post', 'none', 'more than 100 args supplied')
+        block( 'post', 'none', 'more than 100 args supplied' )
       end
 
       -- define TARGET to match against rules
@@ -251,14 +244,10 @@ nw_rules.post = {
       
       if TARGET ~= '' then
         -- check common rules
-        nw_common_rules.check( TARGET )
+        nw_rules.common.check( TARGET )
 
         -- check specific rules
-        for rule_id, rule_re in pairs( nw_rules.post.rules ) do
-          if ngx.re.match( TARGET, rule_re, 'ijo' ) then
-            block( '   post', rule_id, TARGET )
-          end
-        end
+        nw_check('post', TARGET, 'ijo')
       end
     end
     return true

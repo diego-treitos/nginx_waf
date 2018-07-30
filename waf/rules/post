@@ -1,3 +1,3 @@
 # rules matching the POST request parameters
-3000:(?:^|&)[a-z0-9_]+=https?://.+
+3000:(?:^|&)[a-z0-9_]+=https?://(?!<%-server_name-%>).+
 3001:(?:^|&)[a-z0-9_]+=(?:[\.\w-\*\?\s]*/)*(?:\.{2}/)

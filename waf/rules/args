@@ -1,4 +1,4 @@
 # rules matching GET request arguments
-2000:(?:\?|&)[a-z0-9_]+=https?://.+
+2000:(?:\?|&)[a-z0-9_]+=https?://(?!<%-server_name-%>).+
 2001:(?:\?|&)[a-z0-9_]+=(?:[\.\w-\*\?\s]*/)*(?:\.{2}/)
 2002:i\.action\?.*xwork\.MethodAccessor
