@@ -167,6 +167,9 @@ nw_rules.args = {
       if err == "truncated" then
         -- More than 100 args were passed
         block( 'args', 'none', 'more than 100 args supplied')
+      elseif err ~= nil or args_tab == nil then
+        -- If anything was wrong retrieving the args, skip the checks
+        return true
       end
         
       -- define TARGET to match against rules
@@ -236,6 +239,9 @@ nw_rules.post = {
       if err == "truncated" then
         -- More than 100 args were passed
         block( 'post', 'none', 'more than 100 args supplied' )
+      elseif err ~= nil or args_tab == nil then
+        -- If anything was wrong retrieving the args, skip the checks
+        return true
       end
 
       -- define TARGET to match against rules
