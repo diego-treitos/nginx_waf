@@ -230,7 +230,7 @@ nw_rules.agent = {
 nw_rules.post = {
   rules = load_rules( 'post', nw_check_post ),
   check = function()
-    if nw_check_post then
+    if nw_check_post and ngx.req.get_method() == "POST" then
       -- force read POST body
       ngx.req.read_body()
 
