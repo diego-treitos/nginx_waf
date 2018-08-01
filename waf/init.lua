@@ -87,7 +87,6 @@ function nw_check( rule_type, target, re_flags )
   for rule_id, rule_re_t in pairs( nw_rules[rule_type].rules ) do
     -- render this rule
     local rule_re = etlua.render( rule_re_t, ngx.var )
-    ngx.log(ngx.STDERR, rule_re)
     -- check if we need to block this rule
     if ngx.re.match( target, rule_re, re_flags ) then
       block( rule_type, rule_id, target)
