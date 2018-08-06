@@ -1,5 +1,5 @@
 # rules common to all other targets
-0000:<(?:iframe|img|input|object|script).+
+0000:<(?:iframe|img[\s\w-='"]+on|input|object|script).+
 0001:(?:onmouseover|onerror|onload)\=.+
 
 0002:current_(?:user|database|schema|connection_id)(?:\s+|\s*/\*.*\*/\s*)\(.+
