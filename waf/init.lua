@@ -50,6 +50,11 @@ end
 
 -- checks whitelisted rules
 function check_rule_wl( rule_id, rule_wl )
+  if rule_id == nil or rule_wl == nil then
+    -- cannot check whitelist so it is not whitelisted
+    return false
+  end
+
   local id_rule = tonumber( rule_id )
   for _,rule in pairs( rule_wl ) do
     -- rule is a range
