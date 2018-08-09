@@ -48,28 +48,46 @@ function log_blocked( rule_type, rule_id, offending_text )
   return true
 end
 
+-- checks whitelisted rules
+function check_rule_wl( rule_id, rule_wl )
+  local id_rule = tonumber( rule_id )
+  for _,rule in pairs( rule_wl ) do
+    -- rule is a range
+    if rule:find("-") == 5 then
+      id_min = tonumber( rule:sub(1,4) )
+      id_max = tonumber( rule:sub(6,9) )
+    -- rule is not a range
+    else
+      id_min = tonumber( rule )
+      id_max = tonumber( rule )
+    end
+    if id_min <= id_rule and id_rule <= id_max then
+      -- rule is whitelisted
+      return true
+    end
+  end
+  -- rule is not whiltelisted
+  return false
+end
+
+
 -- handles request blocking
 function block( rule_type, rule_id, text_to_check )
   local id_min = nil
   local id_max = nil
-  local id_rule = tonumber( rule_id )
-  for domain_re, whitelisted_rules in pairs( nw_domain_whitelist ) do
-    if ngx.re.match( ngx.var.server_name, domain_re, 'ijo' ) then
-      for _,rule in pairs(whitelisted_rules) do
-        -- rule is a range
-        if rule:find("-") == 5 then
-          id_min = tonumber( rule:sub(1,4) )
-          id_max = tonumber( rule:sub(6,9) )
-        -- rule is not a range
-        else
-          id_min = tonumber( rule )
-          id_max = tonumber( rule )
-        end
-        if id_min <= id_rule and id_rule <= id_max then
-          -- rule is whitelisted, we just return without blocking
-          return true
-        end
-      end
+
+  -- check main rules whitelist
+  if check_rule_wl( rule_id, nw_main_whitelist.rules ) then
+    -- rule is whitelisted, we just return without blocking
+    return true
+  end
+
+  -- check per domain rules whitelist
+  for domain_re,wl in pairs( nw_domain_whitelist ) do
+    if ngx.re.match( ngx.var.server_name, domain_re, 'ijo' ) and
+      check_rule_wl( rule_id, wl.rules ) then
+      -- rule is whitelisted, we just return without blocking
+      return true
     end
   end
   -- log the request

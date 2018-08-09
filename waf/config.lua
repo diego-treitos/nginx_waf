@@ -16,9 +16,15 @@ nw_log_enabled = true
 nw_log_file = '/var/log/nginx/waf.log'
 
 -- exceptions --
-nw_remote_whitelist = {'127.0.0.1'}
+nw_main_whitelist = {
+  [ 'ips' ] = {'127.0.0.1'},
+  ['rules'] = {}
+}
 nw_domain_whitelist = {
-  ['.*\\.example\\.com'] = { '0012', '4000-4002' }
+  ['.*\\.example\\.com'] = {
+    [ 'ips' ] = {},
+    ['rules'] = { '0012', '4000-4002' },
+  },
 }
 
 -- rules --
