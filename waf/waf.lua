@@ -3,9 +3,14 @@
 
 require 'config'
 
+--------------------------------------------------------------------------------
+------------------------ executed per request ----------------------------------
+--------------------------------------------------------------------------------
+--
 if nw_enabled and not ngx.req.is_internal() then
-  -- check whitelist
+  -- check IP whitelist
   local whitelisted = false
+  -- per domain IP whitelist
   for domain_re,wl in pairs( nw_domain_whitelist ) do
     if ngx.re.match( ngx.var.server_name, domain_re, 'ijo' ) and wl.ips ~= nil then
       for _,ip in pairs( wl.ips ) do
@@ -16,7 +21,8 @@ if nw_enabled and not ngx.req.is_internal() then
       end
     end
   end
-  if not whitelist then
+  -- general IP whitelist
+  if not whitelisted then
     for _,ip in pairs( nw_main_whitelist.ips ) do
       if ngx.re.match( ngx.var.remote_addr, ip, 'jo' ) then
         whitelisted = true
@@ -25,6 +31,7 @@ if nw_enabled and not ngx.req.is_internal() then
     end
   end
 
+  -- check rules when not whitelisted
   if not whitelisted then
     for _, rule_type in pairs(nw_rules) do
       rule_type.check()
