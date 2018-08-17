@@ -1,9 +1,30 @@
-Rule Structure
-==============
- 
-----+~~~~~~~~~~~~~
-0000:bad\s+stuff.*
 
-- Rule ID  : 4 digit identificator
+================
+ Rule Structure
+================
+
+
+
+--------------
+ Common Rules
+--------------
+
+---+~~~~~~~~~~~~~
+000:bad\s+stuff.*
+
+- Rule ID  : 3 digit identificator
++ Separator: 1 character separator
+~ Rule Re  : N characters of rule regular expression
+
+
+
+-------------
+ Other rules
+-------------
+
+-----+~~~~~~~~~~~~~
+00000:bad\s+stuff.*
+
+- Rule ID  : 5 digit identificator
 + Separator: 1 character separator
 ~ Rule Re  : N characters of rule regular expression

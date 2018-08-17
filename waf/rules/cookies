@@ -1,1 +1,3 @@
 # rules matching the Cookie HTTP header
+# Base ID: 50000
+# IDs reserved for common rules: 50000-50999

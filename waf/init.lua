@@ -4,10 +4,23 @@
 require 'config'
 local etlua = require 'etlua'
 
-
----- helpers ----
+--------------------------------------------------------------------------------
+---------------------------------- globals -------------------------------------
+--------------------------------------------------------------------------------
 --
--- builds the argument string from an args table
+nw_common_rule_max_id = 999 -- max allowed id for a common rule
+nw_common_rules = {} -- table with the common rules
+nw_rule_ids = {} -- table to keep track of rule ids to grant they are unique
+nw_rules = {} -- main table with the rules and check functions
+
+
+
+
+--------------------------------------------------------------------------------
+---------------------------------- helpers -------------------------------------
+--------------------------------------------------------------------------------
+--
+-------------------------------------------------- args table to query string --
 function build_args( args_map )
   local args = ''
   for key, val in pairs(args_map) do
@@ -26,7 +39,7 @@ function build_args( args_map )
   return ngx.unescape_uri( args:sub(2) )
 end
 
--- logs blocked requests
+-------------------------------------------------------- log blocked requests --
 function log_blocked( rule_type, rule_id, offending_text )
   if nw_log_enabled then
     -- gather info
@@ -48,7 +61,7 @@ function log_blocked( rule_type, rule_id, offending_text )
   return true
 end
 
--- checks whitelisted rules
+------------------------------------------------------------ check whitelists --
 function check_rule_wl( rule_id, rule_wl )
   if rule_id == nil or rule_wl == nil then
     -- cannot check whitelist so it is not whitelisted
@@ -59,8 +72,8 @@ function check_rule_wl( rule_id, rule_wl )
   for _,rule in pairs( rule_wl ) do
     -- rule is a range
     if rule:find("-") == 5 then
-      id_min = tonumber( rule:sub(1,4) )
-      id_max = tonumber( rule:sub(6,9) )
+      id_min = tonumber( rule:sub(1,5) )
+      id_max = tonumber( rule:sub(7,11) )
     -- rule is not a range
     else
       id_min = tonumber( rule )
@@ -75,8 +88,7 @@ function check_rule_wl( rule_id, rule_wl )
   return false
 end
 
-
--- handles request blocking
+--------------------------------------------------------------- block request --
 function block( rule_type, rule_id, text_to_check )
   local id_min = nil
   local id_max = nil
@@ -102,40 +114,74 @@ function block( rule_type, rule_id, text_to_check )
 end
 
 
----- core check ----
+--------------------------------------------------------------------------------
+--------------------------------- core check -----------------------------------
+--------------------------------------------------------------------------------
 --
--- checks the rules of a certain type
+------------------------------------------------------------------ check rule --
 function nw_check( rule_type, target, re_flags )
-  -- iterate over rule templates for given rule type
-  for rule_id, rule_re_t in pairs( nw_rules[rule_type].rules ) do
-    -- render this rule
-    local rule_re = etlua.render( rule_re_t, ngx.var )
-    -- check if we need to block this rule
-    if ngx.re.match( target, rule_re, re_flags ) then
-      block( rule_type, rule_id, target)
+  if target ~= nil and target ~= '' then
+    -- iterate over rule templates for given rule type
+    for rule_id, rule_re_t in pairs( nw_rules[rule_type].rules ) do
+      -- render this rule
+      local rule_re = etlua.render( rule_re_t, ngx.var )
+      -- check if we need to block this rule
+      if ngx.re.match( target, rule_re, re_flags ) then
+        block( rule_type, rule_id, target)
+      end
     end
   end
 end
 
 
----- load rules ----
+--------------------------------------------------------------------------------
+--------------------------------- load rules -----------------------------------
+--------------------------------------------------------------------------------
 --
--- loads the rules from the rules files
-nw_rule_ids = {}
-function load_rules( rule_type, rule_flag )
+----------------------------------------------------------- load common rules --
+function load_common_rules()
+  local rule_file = io.open( nw_path_rules..'/common', 'r' )
+  if rule_file ~= nil then
+    for rule in rule_file:lines() do
+      if rule ~= '' and rule:sub(1,1) ~= '#' and rule:find(':') == 4 then
+        rule_id = tonumber(rule:sub( 1, 3 ))
+        rule_re = rule:sub( 5 )
+        if rule_id > nw_common_rule_max_id then
+          error("Common rule ID "..tostring(rule_id).." is greater than "..tostring( nw_common_rule_max_id ))
+        elseif nw_common_rules[ rule_id ] ~= nil then
+          error("Common rule ID "..tostring(rule_id).." is duplicated")
+        else
+          nw_common_rules[ rule_id ] = rule_re
+        end
+      end
+    end
+    rule_file:close()
+  end
+end
+
+------------------------------------------------------------ load other rules --
+function load_rules( rule_type, base_id, rule_flag )
   local rules = {}
   if rule_flag then
+    -- add common rules
+    for c_rule_id,c_rule in pairs( nw_common_rules ) do
+      rules[ base_id + c_rule_id ] = c_rule
+    end
+
+    -- add specific rules
     local rule_file = io.open( nw_path_rules..'/'..rule_type, 'r' )
     if rule_file ~= nil then
       for rule in rule_file:lines() do
-        if rule ~= '' and rule:sub(1,1) ~= '#' and rule:find(':') == 5 then
-          rule_id = rule:sub( 1, 4 )
-          rule_re = rule:sub( 6 )
+        if rule ~= '' and rule:sub(1,1) ~= '#' and rule:find(':') == 6 then
+          rule_id = tonumber(rule:sub( 1, 5 ))
+          rule_re = rule:sub( 7 )
           rules[ rule_id ] = rule_re
-          if nw_rule_ids[ rule_id ] == nil then
-            nw_rule_ids[ rule_id ] = true
-          else
+          if rule_id < base_id + nw_common_rule_max_id then
+            error("Rule ID "..tostring(rule_id).." is less than "..tostring(base_id + nw_common_rule_max_id))
+          elseif nw_rule_ids[ rule_id ] ~= nil then
             error("Rule ID "..rule_id.." is duplicated")
+          else
+            nw_rule_ids[ rule_id ] = true
           end
         end
       end
@@ -146,43 +192,34 @@ function load_rules( rule_type, rule_flag )
 end
 
 
----- rules table ----
+--------------------------------------------------------------------------------
+-------------------------------- rules table -----------------------------------
+--------------------------------------------------------------------------------
 --
-nw_rules = {}
+---------------------------------------------------------------- common rules --
+load_common_rules()
 
--- common rules --
-nw_rules.common = {
-  -- always load common rules
-  rules = load_rules( 'common', true ),
-  check = function( TARGET )
-    if TARGET ~= nil and TARGET ~= '' then
-      nw_check('common', TARGET, 'ijo')
-    end
-    return true
-  end
-}
-
--- url rules --
-nw_rules.url = {
-  rules = load_rules( 'url', nw_check_url ),
+----------------------------------------------------------------- agent rules --
+nw_rules.agent = {
+  rules = load_rules( 'agent', 10000, nw_check_agent ),
   check = function()
-    if nw_check_url then
+    if nw_check_agent then
       -- define TARGET to match against rules
-      local TARGET = ngx.var.uri
-      
-      -- check common rules
-      nw_rules.common.check( TARGET )
+      local TARGET = ngx.var.http_user_agent
+      if TARGET == nil then
+        block( 'agent', ' nil', '' )
+      end
 
-      -- check specific rules
-      nw_check('url', TARGET, 'ijo')
+      -- check rules
+      nw_check('agent', TARGET, 'jo')
     end
     return true
   end
 }
 
--- args rules --
+------------------------------------------------------------------ args rules --
 nw_rules.args = {
-  rules = load_rules( 'args', nw_check_args ),
+  rules = load_rules( 'args', 20000, nw_check_args ),
   check = function()
     if nw_check_args then
       -- parse args
@@ -198,60 +235,16 @@ nw_rules.args = {
       -- define TARGET to match against rules
       local TARGET = '?'..build_args( args_tab )
       
-      if TARGET ~= '' then
-        -- check common rules
-        nw_rules.common.check( TARGET )
-
-        -- check specific rules
-        nw_check('args', TARGET, 'ijo')
-      end
+      -- check rules
+      nw_check('args', TARGET, 'ijo')
     end
     return true
   end
 }
 
--- cookies rules --
-nw_rules.cookies = {
-  rules = load_rules( 'cookies', nw_check_cookies ),
-  check = function()
-    if nw_check_cookies then
-      -- define TARGET to match against rules
-      local TARGET = ngx.var.http_cookie
-
-      -- check common rules
-      nw_rules.common.check( TARGET )
-
-      -- check specific rules
-      nw_check('cookies', TARGET, 'ijo')
-    end
-    return true
-  end
-}
-
--- agent rules --
-nw_rules.agent = {
-  rules = load_rules( 'agent', nw_check_agent ),
-  check = function()
-    if nw_check_agent then
-      -- define TARGET to match against rules
-      local TARGET = ngx.var.http_user_agent
-      if TARGET == nil then
-        block( 'agent', ' nil', '' )
-      end
-
-      -- check common rules
-      nw_rules.common.check( TARGET )
-
-      -- check specific rules
-      nw_check('agent', TARGET, 'jo')
-    end
-    return true
-  end
-}
-
--- post rules --
+------------------------------------------------------------------ post rules --
 nw_rules.post = {
-  rules = load_rules( 'post', nw_check_post ),
+  rules = load_rules( 'post', 30000, nw_check_post ),
   check = function()
     if nw_check_post and ngx.req.get_method() == "POST" then
       -- force read POST body
@@ -270,13 +263,38 @@ nw_rules.post = {
       -- define TARGET to match against rules
       local TARGET = build_args( args_tab )
       
-      if TARGET ~= '' then
-        -- check common rules
-        nw_rules.common.check( TARGET )
+      -- check specific rules
+      nw_check('post', TARGET, 'ijo')
+    end
+    return true
+  end
+}
 
-        -- check specific rules
-        nw_check('post', TARGET, 'ijo')
-      end
+------------------------------------------------------------------- url rules --
+nw_rules.url = {
+  rules = load_rules( 'url', 40000, nw_check_url ),
+  check = function()
+    if nw_check_url then
+      -- define TARGET to match against rules
+      local TARGET = ngx.var.uri
+      
+      -- check specific rules
+      nw_check('url', TARGET, 'ijo')
+    end
+    return true
+  end
+}
+
+--------------------------------------------------------------- cookies rules --
+nw_rules.cookies = {
+  rules = load_rules( 'cookies', 50000, nw_check_cookies ),
+  check = function()
+    if nw_check_cookies then
+      -- define TARGET to match against rules
+      local TARGET = ngx.var.http_cookie
+
+      -- check specific rules
+      nw_check('cookies', TARGET, 'ijo')
     end
     return true
   end
