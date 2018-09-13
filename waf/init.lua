@@ -63,7 +63,7 @@ end
 
 ------------------------------------------------------------ check whitelists --
 function check_rule_wl( rule_id, rule_wl )
-  if rule_id == nil or rule_wl == nil then
+  if type(rule_id) == 'nil' or type(rule_wl) == 'nil' then
     -- cannot check whitelist so it is not whitelisted
     return false
   end
