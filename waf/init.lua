@@ -71,14 +71,22 @@ function check_rule_wl( rule_id, rule_wl )
   local id_rule = tonumber( rule_id )
   for _,rule in pairs( rule_wl ) do
     -- rule is a range
-    if rule:find("-") == 5 then
-      id_min = tonumber( rule:sub(1,5) )
-      id_max = tonumber( rule:sub(7,11) )
+    s_pos = rule:find("-")
+    if s_pos ~= nil then
+      id_min = tonumber( rule:sub(1,s_pos-1) )
+      id_max = tonumber( rule:sub(s_pos+1) )
     -- rule is not a range
     else
       id_min = tonumber( rule )
       id_max = tonumber( rule )
     end
+
+    if type(id_min) == 'nil' or type(id_max) == 'nil' then
+      -- something went wrong parsing the whitelist rule
+      ngx.log(ngx.ERR, 'Something went wrong parsing the rule "'..tostring(rule_wl)..'"')
+      return false
+    end
+
     if id_min <= id_rule and id_rule <= id_max then
       -- rule is whitelisted
       return true
