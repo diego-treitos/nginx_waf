@@ -63,12 +63,12 @@ end
 
 ------------------------------------------------------------ check whitelists --
 function check_rule_wl( rule_id, rule_wl )
-  if type(rule_id) == 'nil' or type(rule_wl) == 'nil' then
+  local id_rule = tonumber( rule_id )
+  if type(id_rule) == 'nil' or type(rule_wl) == 'nil' then
     -- cannot check whitelist so it is not whitelisted
     return false
   end
 
-  local id_rule = tonumber( rule_id )
   for _,rule in pairs( rule_wl ) do
     -- rule is a range
     s_pos = rule:find("-")
@@ -98,9 +98,6 @@ end
 
 --------------------------------------------------------------- block request --
 function block( rule_type, rule_id, text_to_check )
-  local id_min = nil
-  local id_max = nil
-
   -- check main rules whitelist
   if check_rule_wl( rule_id, nw_main_whitelist.rules ) then
     -- rule is whitelisted, we just return without blocking
