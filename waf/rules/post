@@ -1,5 +1,5 @@
 # rules matching the POST request parameters
 # Base ID: 30000
 # IDs reserved for common rules: 30000-30999
-31000:(?:^|&)[a-z0-9_]+=https?://(?!<%-server_name-%>).+
+31000:(?:^|&)[a-z0-9_]+=https?://(?!<%-host-%>).+
 31001:(?:^|&)[a-z0-9_]+=(?:[\.\w-\*\?\s]*/)*(?:\.{2}/)

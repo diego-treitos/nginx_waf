@@ -1,6 +1,6 @@
 # rules matching GET request arguments
 # Base ID: 20000
 # IDs reserved for common rules: 20000-20999
-21000:(?:\?|&)[a-z0-9_]+=https?://(?!<%-server_name-%>).+
+21000:(?:\?|&)[a-z0-9_]+=https?://(?!<%-host-%>).+
 21001:(?:\?|&)[a-z0-9_]+=(?:[\.\w-\*\?\s]*/)*(?:\.{2}/)
 21002:i\.action\?.*xwork\.MethodAccessor
