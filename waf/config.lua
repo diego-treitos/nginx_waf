@@ -3,6 +3,7 @@
 -- general --
 nw_enabled = true
 nw_location_denied = '@waf-blocked'
+nw_max_args = 300
 
 -- rule type toggle --
 nw_check_url     = true
