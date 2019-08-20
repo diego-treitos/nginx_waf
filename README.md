@@ -41,6 +41,7 @@ The main configuration file has these options:
 
 `nw_enabled`: (true/false): Enables or disables the use of the WAF.
 `nw_location_denied`: (nginx location): Sets the nginx location where the blocked requests will be sent.
+`nw_max_args`: (number): Sets the maximum number of URI and POST arguments. Requests with more will be blocked.
 `nw_check_url`: (true/false): Toggles the check of rules matching the URL in the requests
 `nw_check_args`: (true/false): Toggles the check of rules matching the query arguments in the requests
 `nw_check_post`: (true/false): Toggles the check of rules matching the post parameters in POST requests
