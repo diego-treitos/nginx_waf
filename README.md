@@ -56,11 +56,19 @@ The main configuration file has these options:
 The rules are regular expressions with IDs that match evil data in the requests so they get blocked by the WAF.
 
 #### overview
-TODO:
- * Explain how are they deployed (rule files)
- * Explain the types of rules
- * Explain the common rules
- * Explain the rule IDs (how they work with common rules)
+
+The rules are distributed in different files under the `/waf/rules` directory. Each file corresponds to a different category of rules. They are basically a list of regular expressions that match against potentially harmful data. There is also a _README_ file there where the internal structure of the rule files is explained. 
+
+There are currently 6 types of rules:
+
+ * **agent**: These rules will match against the `User-Agent` header value.
+ * **args**: These rules will match against url arguments for `GET` requests.
+ * **cookies**: These rules will match against the `Cookie` header value.
+ * **post**: These rules will match against the arguments of a `POST` request.
+ * **url**: These rules will match against the url of the request.
+ * **common**: These rules will be used in all te type of checks.
+ 
+ Each type of rule has a 5 digit base id (i.e.: 50000) and the first thousand ids are reserved for the common rules. This means that if the base id for `post` rules is `30000`, the first id allowed to be used in the `post` rules file will be `31000`, as any other id before that can be used by the common rules. This allows us to whitelist common rules of a specific type (for example `30001` would whitelist the common rule with id `001` for `post` checks).
  
 #### creating rules
 TODO:
