@@ -231,7 +231,7 @@ nw_rules.args = {
       local args_tab, err = ngx.req.get_uri_args( nw_max_args )
       if err == "truncated" then
         -- More than 'nw_max_args' args were passed
-        block( 'args', 'none', 'more than ' .. nw_max_args .. ' args supplied')
+        block( 'args', 'none', 'more than ' .. tostring(nw_max_args) .. ' args supplied')
       elseif err ~= nil or args_tab == nil then
         -- If anything was wrong retrieving the args, skip the checks
         return true
@@ -259,7 +259,7 @@ nw_rules.post = {
       local args_tab, err = ngx.req.get_post_args( nw_max_args )
       if err == "truncated" then
         -- More than 'nw_max_args' args were passed
-        block( 'post', 'none', 'more than ' .. nw_max_args .. ' args supplied')
+        block( 'post', 'none', 'more than ' .. tostring(nw_max_args) .. ' args supplied')
       elseif err ~= nil or args_tab == nil then
         -- If anything was wrong retrieving the args, skip the checks
         return true
