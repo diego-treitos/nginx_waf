@@ -17,7 +17,7 @@ And that the symbolic link `50-mod-http-lua.conf -> /usr/share/nginx/modules-ava
 2. Add to `nginx.conf`, in the `http` section:
 
 ```
-  lua_package_path   "/etc/nginx/waf/?.lua";
+  lua_package_path   "/etc/nginx/waf/?.lua;;";
   init_by_lua_file   "/etc/nginx/waf/init.lua";
   access_by_lua_file "/etc/nginx/waf/waf.lua";
 ```
