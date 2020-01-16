@@ -22,8 +22,16 @@ And that the symbolic link `50-mod-http-lua.conf -> /usr/share/nginx/modules-ava
   access_by_lua_file "/etc/nginx/waf/waf.lua";
 ```
 
-3. Create a location for the blocked requests in the `server` section of your site configuration. Default `@waf-blocked` but can
-be changed in the `waf/config.lua` configuration file.
+3. Create a location for the blocked requests in the `server` section of your site configuration. Default `@waf-blocked` but can be changed in the `waf/config.lua` configuration file.
+
+4. Make sure that the log file has write permissions for the nginx user. In _Debian_ systems this user is `www-data` and you might need to set the log file to `/var/log/nginx/waf/waf.log` and then execute:
+
+```
+mkdir /var/log/nginx/waf
+chown www-data:ww-data /var/log/nginx/waf
+chmod 640 /var/log/nginx/waf
+
+```
 
 ## Configuration
 This WAF allows several configuration options like:
