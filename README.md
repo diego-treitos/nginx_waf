@@ -22,8 +22,16 @@ And that the symbolic link `50-mod-http-lua.conf -> /usr/share/nginx/modules-ava
   access_by_lua_file "/etc/nginx/waf/waf.lua";
 ```
 
-3. Create a location for the blocked requests in the `server` section of your site configuration. Default `@waf-blocked` but can
-be changed in the `waf/config.lua` configuration file.
+3. Create a location for the blocked requests in the `server` section of your site configuration. Default `@waf-blocked` but can be changed in the `waf/config.lua` configuration file.
+
+4. Make sure that the log file has write permissions for the nginx user. In _Debian_ systems this user is `www-data` and you might need to set the log file to `/var/log/nginx/waf/waf.log` and then execute:
+
+```
+mkdir /var/log/nginx/waf
+chown www-data:ww-data /var/log/nginx/waf
+chmod 640 /var/log/nginx/waf
+
+```
 
 ## Configuration
 This WAF allows several configuration options like:
@@ -40,17 +48,30 @@ This WAF allows several configuration options like:
 The main configuration file has these options:
 
 `nw_enabled`: (true/false): Enables or disables the use of the WAF.
+
 `nw_location_denied`: (nginx location): Sets the nginx location where the blocked requests will be sent.
+
 `nw_max_args`: (number): Sets the maximum number of URI and POST arguments. Requests with more will be blocked.
+
 `nw_check_url`: (true/false): Toggles the check of rules matching the URL in the requests
+
 `nw_check_args`: (true/false): Toggles the check of rules matching the query arguments in the requests
+
 `nw_check_post`: (true/false): Toggles the check of rules matching the post parameters in POST requests
+
 `nw_check_cookies`: (true/false): Toggles the check of rules matching the `Cookie` HTTP header in the requests
+
 `nw_check_agent`: (true/false): Toggles the check of rules matching the `User-Agent` HTTP header in the requests
+
 `nw_log_enabled`: (true/false): Enables or disables the log of the blocked requests
+
 `nw_log_file`: (filesystem path): Sets the path of the log file for the blocked requests
-`nw_main_whitelist`: (lua table): Configures the general whitelist of source IP addresses and rules. See example in config file.
+
+`nw_main_whitelist`: (lua table): Configures the general whitelist of source IP addresses and rules. See example in config 
+file.
+
 `nw_domain_whitelist`: (lua table): Configures whitelists of rules and source IPs that match regular expressions against domain names. Check the example in the config file.
+
 `nw_path_rules`: (filesystem path): Sets the path of the directory from where to read the files of the rules
 
 ### rules
