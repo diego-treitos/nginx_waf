@@ -28,7 +28,7 @@ And that the symbolic link `50-mod-http-lua.conf -> /usr/share/nginx/modules-ava
 
 ```
 mkdir /var/log/nginx/waf
-chown www-data:ww-data /var/log/nginx/waf
+chown www-data:www-data /var/log/nginx/waf
 chmod 640 /var/log/nginx/waf
 
 ```
