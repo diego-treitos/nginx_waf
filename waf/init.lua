@@ -34,7 +34,7 @@ function build_args( args_map )
       args = args..'&'..key..'='..val
     end
   end
-  
+
   -- remove the first '&' and unescape
   return ngx.unescape_uri( args:sub(2) )
 end
@@ -236,10 +236,10 @@ nw_rules.args = {
         -- If anything was wrong retrieving the args, skip the checks
         return true
       end
-        
+
       -- define TARGET to match against rules
       local TARGET = '?'..build_args( args_tab )
-      
+
       -- check rules
       nw_check('args', TARGET, 'ijo')
     end
@@ -267,7 +267,7 @@ nw_rules.post = {
 
       -- define TARGET to match against rules
       local TARGET = build_args( args_tab )
-      
+
       -- check specific rules
       nw_check('post', TARGET, 'ijo')
     end
@@ -282,7 +282,7 @@ nw_rules.url = {
     if nw_check_url then
       -- define TARGET to match against rules
       local TARGET = ngx.var.uri
-      
+
       -- check specific rules
       nw_check('url', TARGET, 'ijo')
     end
