@@ -8,7 +8,7 @@ require 'waflib'
 ------------------------ executed per request ----------------------------------
 --------------------------------------------------------------------------------
 --
-if nw_enabled and not ngx.req.is_internal() then
+if nw_enabled and not ngx.is_subrequest then
   -- check IP whitelist
   local whitelisted = false
   -- per domain IP whitelist
