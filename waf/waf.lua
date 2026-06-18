@@ -14,8 +14,8 @@ if nw_enabled and not ngx.req.is_internal() then
   -- per domain IP whitelist
   for domain_re,wl in pairs( nw_domain_whitelist ) do
     if ngx.re.match( ngx.var.server_name, domain_re, 'ijo' ) and wl.ips ~= nil then
-      for _,ip in pairs( wl.ips ) do
-        if ngx.re.match( ngx.var.remote_addr, ip, 'jo' ) then
+      for _,cidr in pairs( wl.ips ) do
+        if is_ip_in_cidr( ngx.var.remote_addr, cidr ) then
           whitelisted = true
           break
         end
