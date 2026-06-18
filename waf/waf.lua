@@ -2,6 +2,7 @@
 --
 
 require 'config'
+require 'waflib'
 
 --------------------------------------------------------------------------------
 ------------------------ executed per request ----------------------------------
@@ -23,8 +24,8 @@ if nw_enabled and not ngx.req.is_internal() then
   end
   -- general IP whitelist
   if not whitelisted then
-    for _,ip in pairs( nw_main_whitelist.ips ) do
-      if ngx.re.match( ngx.var.remote_addr, ip, 'jo' ) then
+    for _,cidr in pairs( nw_main_whitelist.ips ) do
+      if is_ip_in_cidr( ngx.var.remote_addr, cidr ) then
         whitelisted = true
         break
       end
